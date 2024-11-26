@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Nav, Button, Offcanvas } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import './sidebar.css';
 
 const Sidebar = () => {
@@ -26,20 +27,20 @@ const Sidebar = () => {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Nav className="flex-column sidebar-nav">
-            <Button variant="light" className="sidebar-button shadow-sm">
+            <Link to="/" className="btn btn-light sidebar-button shadow-sm">
               Home
-            </Button>
-            <Button variant="light" className="sidebar-button shadow-sm">
+            </Link>
+            <Link to="/maquinas-em-uso" className="btn btn-light sidebar-button shadow-sm">
               Máquinas em uso
-            </Button>
-            <Button variant="light" className="sidebar-button shadow-sm">
+            </Link>
+            <Link to="/backup" className="btn btn-light sidebar-button shadow-sm">
               Máquinas Backup
-            </Button>
+            </Link>
           </Nav>
         </Offcanvas.Body>
       </Offcanvas>
 
-      {/* Sidebar fixa*/}
+      {/* Sidebar fixa */}
       <div className="sidebar d-none d-md-flex">
         <div className="sidebar-logo">
           <img
@@ -49,15 +50,15 @@ const Sidebar = () => {
           />
         </div>
         <Nav className="flex-column sidebar-nav">
-          <Button variant="light" className="sidebar-button shadow-sm">
+          <Link to="/" className="btn btn-light sidebar-button shadow-sm">
             Home
-          </Button>
-          <Button variant="light" className="sidebar-button shadow-sm">
-          Máquinas em uso
-          </Button>
-          <Button variant="light" className="sidebar-button shadow-sm">
+          </Link>
+          <Link to="/maquinas-em-uso" className="btn btn-light sidebar-button shadow-sm">
+            Máquinas em uso
+          </Link>
+          <Link to="/backup" className="btn btn-light sidebar-button shadow-sm">
             Máquinas Backup
-          </Button>
+          </Link>
         </Nav>
       </div>
     </>
