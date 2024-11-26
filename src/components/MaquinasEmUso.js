@@ -16,50 +16,48 @@ const MaquinasEmUso = () => {
   ];
 
   return (
-    <div className="machines-header">
-      <Container className="machines-container">
-        <h1 className="page-title">Máquinas em Uso</h1>
+    <Container className="machines-container m-5">
+      <h1 className="page-title">Máquinas em Uso</h1>
 
-        {/* Barra de Pesquisa */}
-        <div className="search-bar">
-          <InputGroup>
-            <FormControl
-              placeholder="Pesquisa"
-              aria-label="Pesquisa"
-              className="search-input"
-            />
-          </InputGroup>
-        </div>
-
-        {/* Tabela */}
-        <div className="table-container">
-          <Table bordered responsive>
-            <thead>
-              <tr>
-                <th>Nome da máquina</th>
-                <th>Nº da máquina</th>
-                <th>IP</th>
-                <th>Cliente</th>
-                <th>Endereço</th>
-                <th>Cidade</th>
+      {/* Tabela */}
+      <div className="table-container">
+        <Table bordered responsive>
+          <thead>
+            <tr>
+              <th>Nome da máquina</th>
+              <th>Nº da máquina</th>
+              <th>IP</th>
+              <th>Cliente</th>
+              <th>Endereço</th>
+              <th>Cidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {machines.map((machine, index) => (
+              <tr key={index}>
+                <td>{machine.name}</td>
+                <td>{machine.number}</td>
+                <td>{machine.ip}</td>
+                <td>{machine.client}</td>
+                <td>{machine.address}</td>
+                <td>{machine.city}</td>
               </tr>
-            </thead>
-            <tbody>
-              {machines.map((machine, index) => (
-                <tr key={index}>
-                  <td>{machine.name}</td>
-                  <td>{machine.number}</td>
-                  <td>{machine.ip}</td>
-                  <td>{machine.client}</td>
-                  <td>{machine.address}</td>
-                  <td>{machine.city}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      </Container>
-    </div>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Barra de Pesquisa */}
+      <div className="search-bar m-5">
+        <InputGroup>
+          <FormControl
+            placeholder="Pesquisa"
+            aria-label="Pesquisa"
+            className="search-input"
+          />
+        </InputGroup>
+      </div>
+    </Container>
   );
 };
 
