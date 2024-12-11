@@ -103,7 +103,47 @@ class GoogleSheetsService:
             for index, record in enumerate(all_records, start=2):
                 if record.get('serialNumber') == machine['id']:
                     sheet.update(f"A{index}:E{index}", [[
-                        machine['name'], record.get('serialNumber'), machine['model'], machine['status'], machine['obs']
+                        machine['name'], record.get('serialNumber'), machine['model'],machine['status'], machine['obs']
+                    ]])
+                    print(f"Máquina com serialNumber {machine['id']} atualizada com sucesso.")
+                    return
+            print("Máquina com serialNumber não encontrada para edição.")
+        except Exception as e:
+            print(f"Erro ao editar máquina: {e}")
+
+    def get_itfacil_machines(self):
+        """Recupera todas as máquinas da aba 'Máquinas ITFacil'."""
+        sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
+        return sheet.get_all_records()
+
+    def add_itfacil_machine(self, machine):
+        """Adiciona uma nova máquina à aba 'Máquinas ITFacil'."""
+        try:
+            sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
+            print(machine)
+            sheet.append_row([machine['name'], machine['id'], machine['model'], machine['equipamento'], machine['status'], machine['obs']])
+        except Exception as e:
+            print(f"erro: {e}")
+
+    def remove_itfacil_machine(self, machine_id):
+        """Remove uma máquina pelo ID na aba 'Máquinas itfacil'."""
+        sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
+        all_records = sheet.get_all_records()
+        for index, record in enumerate(all_records, start=2):
+            if record.get('serialNumber') == machine_id:  # Verifica pelo 'id'
+                sheet.delete_rows(index)
+                break
+
+    def edit_itfacil_machine(self, machine):
+        """Edita os dados de uma máquina existente na aba 'Máquinas itfacil', exceto o serialNumber."""
+        try:
+            sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
+            all_records = sheet.get_all_records()
+            for index, record in enumerate(all_records, start=2):
+                if record.get('serialNumber') == machine['id']:
+                    print(f'Maquina class: {machine}')
+                    sheet.update(f"A{index}:F{index}", [[
+                        machine['name'], record.get('serialNumber'), machine['model'], machine['equipamento'], machine['status'], machine['obs']
                     ]])
                     print(f"Máquina com serialNumber {machine['id']} atualizada com sucesso.")
                     return

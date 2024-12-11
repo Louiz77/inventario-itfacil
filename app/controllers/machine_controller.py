@@ -40,6 +40,7 @@ class MachineController:
                 name=data.get('hostname'),  # Status com valor padrão
                 status=data.get('status'),
                 model=data.get('modelo'),
+                equipamento=None,
                 obs=data.get('observacoes')
             )
 
@@ -54,7 +55,7 @@ class MachineController:
         try:
             data = request.json
             print(data)
-            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], status=data['status'], obs=data['observation'])
+            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], equipamento=None, status=data['status'], obs=data['observation'])
             self.google_sheets_service.add_backup_machine(machine.to_dict())
             return jsonify({"message": "Backup row added"}), 201
         except Exception as e:
@@ -67,3 +68,47 @@ class MachineController:
         print(data)
         self.google_sheets_service.remove_backup_machine(data['serialNumber'])
         return jsonify({"message": "Backup row removed"}), 200
+
+    def get_itfacil_machines(self):
+        """Recupera as máquinas da aba 'Máquinas Backup'."""
+        itfacil_machines = self.google_sheets_service.get_itfacil_machines()
+        return jsonify(itfacil_machines), 200
+
+    def edit_itfacil_machine(self):
+        try:
+            data = request.json
+            print(f"Payload recebido: {data}")
+
+            machine = Machine(
+                id=data.get('serialNumber'),  # Certifique-se de que o ID esteja correto no payload
+                name=data.get('name'),  # Status com valor padrão
+                status=data.get('status'),
+                model=data.get('modelo'),
+                equipamento=data.get('equipamento'),
+                obs=data.get('observacoes')
+            )
+
+            self.google_sheets_service.edit_itfacil_machine(machine.to_dict())
+            return jsonify({"message": "Máquina atualizada"}), 200
+        except Exception as e:
+            print(f"Erro ao editar máquina: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    def add_itfacil_machine(self):
+        """Adiciona uma nova máquina à aba 'Máquinas itfacil'."""
+        try:
+            data = request.json
+            print(data)
+            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], equipamento=data['equipamento'], status=data['status'], obs=data['observation'])
+            self.google_sheets_service.add_itfacil_machine(machine.to_dict())
+            return jsonify({"message": "itfacil row added"}), 201
+        except Exception as e:
+            print(f"Erro ao adicionar máquina: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    def remove_itfacil_machine(self):
+        """Remove uma máquina da aba 'Máquinas itfacil'."""
+        data = request.json
+        print(data)
+        self.google_sheets_service.remove_itfacil_machine(data['serialNumber'])
+        return jsonify({"message": "itfacil row removed"}), 200
