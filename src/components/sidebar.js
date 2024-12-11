@@ -25,13 +25,16 @@ const Sidebar = () => {
           <Link to="/" className="btn btn-light mb-5">
             Home
           </Link>
+          <Link to="/itfacil" className="btn btn-light mb-2">
+            Máquinas ITFácil
+          </Link>
           <Link to="/maquinas-em-uso" className="btn btn-light mb-2">
             Máquinas em uso
           </Link>
           <Link to="/backup" className="btn btn-light mb-2">
             Máquinas Backup
           </Link>
-          <Link to="/manutencao" className="btn btn-light">
+          <Link to="/manutencao" className="btn btn-light mb-2">
             Máquinas em manutenção
           </Link>
         </Nav>

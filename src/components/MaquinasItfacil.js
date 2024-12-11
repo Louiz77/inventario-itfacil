@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
 
-const MaquinasBackup = () => {
+const MaquinasItfacil = () => {
   const [backupMachines, setBackupMachines] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -21,10 +21,10 @@ const MaquinasBackup = () => {
 
   const fetchBackupMachines = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/backup_machines');
+      const response = await axios.get('http://localhost:5000/itfacil_machines');
       setBackupMachines(response.data);
     } catch (error) {
-      setAlert({ show: true, message: 'Erro ao carregar máquinas de backup.', variant: 'danger' });
+      setAlert({ show: true, message: 'Erro ao carregar máquinas da itfacil.', variant: 'danger' });
     }
   };
 
@@ -46,39 +46,39 @@ const MaquinasBackup = () => {
 
   const handleSaveMachine = async () => {
     try {
-      await axios.post('http://localhost:5000/add_backup_machine', currentMachine);
-      setAlert({ show: true, message: 'Máquina de backup adicionada com sucesso.', variant: 'success' });
+      await axios.post('http://localhost:5000/add_itfacil_machine', currentMachine);
+      setAlert({ show: true, message: 'Máquina da ITFácil adicionada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
     } catch (error) {
-      setAlert({ show: true, message: 'Erro ao adicionar a máquina de backup.', variant: 'danger' });
+      setAlert({ show: true, message: 'Erro ao adicionar a máquina da itfacil.', variant: 'danger' });
     }
   };
 
   const handleUpdateMachine = async () => {
     try {
-      await axios.post('http://localhost:5000/edit_backup_machine', currentMachine);
-      setAlert({ show: true, message: 'Máquina de backup atualizada com sucesso.', variant: 'success' });
+      await axios.post('http://localhost:5000/edit_itfacil_machine', currentMachine);
+      setAlert({ show: true, message: 'Máquina da ITFácil atualizada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
     } catch (error) {
-      setAlert({ show: true, message: 'Erro ao atualizar a máquina de backup.', variant: 'danger' });
+      setAlert({ show: true, message: 'Erro ao atualizar a máquina da itfacil.', variant: 'danger' });
     }
   };
 
   const handleRemoveMachine = async (serialNumber) => {
     try {
-      await axios.post('http://localhost:5000/remove_backup_machine', { serialNumber });
-      setAlert({ show: true, message: 'Máquina de backup removida com sucesso.', variant: 'success' });
+      await axios.post('http://localhost:5000/remove_itfacil_machine', { serialNumber });
+      setAlert({ show: true, message: 'Máquina da ITFácil removida com sucesso.', variant: 'success' });
       fetchBackupMachines();
     } catch (error) {
-      setAlert({ show: true, message: 'Erro ao remover a máquina de backup.', variant: 'danger' });
+      setAlert({ show: true, message: 'Erro ao remover a máquina da itfacil.', variant: 'danger' });
     }
   };
 
   return (
     <div className="container mt-4 d-grid gap-2">
-      <h2 className="text-center">Máquinas Backup</h2>
+      <h2 className="text-center">Máquinas da ITFácil</h2>
       {alert.show && <Alert variant={alert.variant}>{alert.message}</Alert>}
       <Button variant="primary" size="lg" className="mb-5" onClick={handleShowAddModal}>
         Adicionar Máquina
@@ -87,9 +87,10 @@ const MaquinasBackup = () => {
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>Hostname</th>
+              <th>Nome</th>
               <th>Serial Number</th>
               <th>Modelo</th>
+              <th>Equipamento</th>
               <th>Status</th>
               <th>Observação</th>
               <th>Ações</th>
@@ -98,9 +99,10 @@ const MaquinasBackup = () => {
           <tbody>
             {backupMachines.map((machine) => (
               <tr key={machine.serialNumber}>
-                <td>{machine.hostname}</td>
+                <td>{machine.name}</td>
                 <td>{machine.serialNumber}</td>
                 <td>{machine.modelo}</td>
+                <td>{machine.equipamento}</td>
                 <td>{machine.status}</td>
                 <td>{machine.observacoes}</td>
                 <td>
@@ -141,11 +143,11 @@ const MaquinasBackup = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Hostname</Form.Label>
+              <Form.Label>Nome</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Hostname"
-                value={currentMachine.hostname}
+                placeholder="Nome do responsável pela máquina"
+                value={currentMachine.name}
                 onChange={(e) => setCurrentMachine({ ...currentMachine, hostname: e.target.value })}
               />
             </Form.Group>
@@ -156,6 +158,15 @@ const MaquinasBackup = () => {
                 placeholder="Modelo da Máquina"
                 value={currentMachine.model}
                 onChange={(e) => setCurrentMachine({ ...currentMachine, model: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Equipamento (Fabricante)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Fabricante da Máquina"
+                value={currentMachine.equipamento}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, equipamento: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -211,11 +222,11 @@ const MaquinasBackup = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Hostname</Form.Label>
+              <Form.Label>Nome</Form.Label>
               <Form.Control
                 type="text"
-                value={currentMachine.hostname}
-                onChange={(e) => setCurrentMachine({ ...currentMachine, hostname: e.target.value })}
+                value={currentMachine.name}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, name: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -225,6 +236,15 @@ const MaquinasBackup = () => {
                 placeholder="Modelo da Máquina"
                 value={currentMachine.modelo}
                 onChange={(e) => setCurrentMachine({ ...currentMachine, modelo: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Equipamento (Fabricante)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Fabricante da Máquina"
+                value={currentMachine.equipamento}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, equipamento: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -267,4 +287,4 @@ const MaquinasBackup = () => {
   );
 };
 
-export default MaquinasBackup;
+export default MaquinasItfacil;

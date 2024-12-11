@@ -20,7 +20,7 @@
   margin: 1rem 0;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1600px) {
   .sidebar {
     width: 100%;
     height: auto;
