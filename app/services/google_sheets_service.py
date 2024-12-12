@@ -121,7 +121,13 @@ class GoogleSheetsService:
         try:
             sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
             print(machine)
-            sheet.append_row([machine['name'], machine['id'], machine['model'], machine['equipamento'], machine['status'], machine['obs']])
+            sheet.append_row([machine['name'],
+                              machine['id'],
+                              machine['model'],
+                              machine['equipamento'],
+                              machine['status'],
+                              machine['obs'],
+                              machine['empresa']])
         except Exception as e:
             print(f"erro: {e}")
 
@@ -142,8 +148,14 @@ class GoogleSheetsService:
             for index, record in enumerate(all_records, start=2):
                 if record.get('serialNumber') == machine['id']:
                     print(f'Maquina class: {machine}')
-                    sheet.update(f"A{index}:F{index}", [[
-                        machine['name'], record.get('serialNumber'), machine['model'], machine['equipamento'], machine['status'], machine['obs']
+                    sheet.update(f"A{index}:G{index}", [[
+                        machine['name'],
+                        record.get('serialNumber'),
+                        machine['model'],
+                        machine['equipamento'],
+                        machine['status'],
+                        machine['obs'],
+                        machine['empresa']
                     ]])
                     print(f"Máquina com serialNumber {machine['id']} atualizada com sucesso.")
                     return
