@@ -21,7 +21,7 @@ const MaquinasBackup = () => {
 
   const fetchBackupMachines = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/backup_machines');
+      const response = await axios.get('http://10.5.9.45:5000/backup_machines');
       setBackupMachines(response.data);
     } catch (error) {
       setAlert({ show: true, message: 'Erro ao carregar máquinas de backup.', variant: 'danger' });
@@ -46,7 +46,7 @@ const MaquinasBackup = () => {
 
   const handleSaveMachine = async () => {
     try {
-      await axios.post('http://localhost:5000/add_backup_machine', currentMachine);
+      await axios.post('http://10.5.9.45:5000/add_backup_machine', currentMachine);
       setAlert({ show: true, message: 'Máquina de backup adicionada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
@@ -57,7 +57,7 @@ const MaquinasBackup = () => {
 
   const handleUpdateMachine = async () => {
     try {
-      await axios.post('http://localhost:5000/edit_backup_machine', currentMachine);
+      await axios.post('http://10.5.9.45:5000/edit_backup_machine', currentMachine);
       setAlert({ show: true, message: 'Máquina de backup atualizada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
@@ -68,7 +68,7 @@ const MaquinasBackup = () => {
 
   const handleRemoveMachine = async (serialNumber) => {
     try {
-      await axios.post('http://localhost:5000/remove_backup_machine', { serialNumber });
+      await axios.post('http://10.5.9.45:5000/remove_backup_machine', { serialNumber });
       setAlert({ show: true, message: 'Máquina de backup removida com sucesso.', variant: 'success' });
       fetchBackupMachines();
     } catch (error) {
