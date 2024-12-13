@@ -41,7 +41,8 @@ class MachineController:
                 status=data.get('status'),
                 model=data.get('modelo'),
                 equipamento=None,
-                obs=data.get('observacoes')
+                obs=data.get('observacoes'),
+                empresa=None
             )
 
             self.google_sheets_service.edit_backup_machine(machine.to_dict())
@@ -55,7 +56,7 @@ class MachineController:
         try:
             data = request.json
             print(data)
-            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], equipamento=None, status=data['status'], obs=data['observation'])
+            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], equipamento=None, status=data['status'], empresa=None, obs=data['observation'])
             self.google_sheets_service.add_backup_machine(machine.to_dict())
             return jsonify({"message": "Backup row added"}), 201
         except Exception as e:
