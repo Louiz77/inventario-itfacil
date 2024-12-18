@@ -20,6 +20,42 @@
   margin: 1rem 0;
 }
 
+.botoes .btn {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #02223F; /* Cor inicial do texto */
+  background-color: #FFFFFF; /* Cor inicial do fundo */
+  border: 2px solid #02223F; /* Borda */
+  border-radius: 5px;
+  cursor: pointer;
+  overflow: hidden; /* Esconde o excesso */
+  z-index: 1;
+  transition: color 0.7s ease; /* Suaviza a mudança de cor do texto */
+}
+
+.botoes .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background-color: #02223F; /* Cor do preenchimento */
+  z-index: -1; /* Fica atrás do texto */
+  transition: width 0.9s ease; /* Suaviza o preenchimento */
+}
+
+.botoes .btn:hover {
+  color: #FFFFFF; /* Texto branco no hover */
+}
+
+.botoes .btn:hover::before {
+  width: 100%; /* Preenche o botão da esquerda para a direita */
+}
+
 @media (max-width: 1600px) {
   .sidebar {
     width: 100%;

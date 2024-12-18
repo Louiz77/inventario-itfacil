@@ -21,7 +21,7 @@ const Sidebar = () => {
         </div>
 
         {/* Links de navegação */}
-        <Nav className="flex-column p-3">
+        <Nav className="botoes flex-column p-3">
           <Link to="/" className="btn btn-light mb-5">
             Home
           </Link>
