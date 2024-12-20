@@ -22,7 +22,7 @@ const MaquinasEmManutencao = () => {
 
   const fetchMachinesUnderMaintenance = async () => {
     try {
-      const response = await axios.get('http://10.5.9.45:5000/machines_under_maintenance');
+      const response = await axios.get('http://10.5.8.145:5005/machines_under_maintenance');
       setMachinesUnderMaintenance(response.data);
     } catch (error) {
       setAlert({ show: true, message: 'Erro ao carregar máquinas em manutenção.', variant: 'danger' });
@@ -47,7 +47,7 @@ const MaquinasEmManutencao = () => {
 
   const handleSaveMachine = async () => {
     try {
-      await axios.post('http://10.5.9.45:5000/add_machine_under_maintenance', currentMachine);
+      await axios.post('http://10.5.8.145:5005/add_machine_under_maintenance', currentMachine);
       setAlert({ show: true, message: 'Máquina adicionada à manutenção com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
       handleCloseModal();
@@ -58,7 +58,7 @@ const MaquinasEmManutencao = () => {
 
   const handleUpdateMachine = async () => {
     try {
-      await axios.post('http://10.5.9.45:5000/edit_machine_under_maintenance', currentMachine);
+      await axios.post('http://10.5.8.145:5005/edit_machine_under_maintenance', currentMachine);
       setAlert({ show: true, message: 'Máquina atualizada com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
       handleCloseModal();
@@ -69,7 +69,7 @@ const MaquinasEmManutencao = () => {
 
   const handleRemoveMachine = async (serialNumber) => {
     try {
-      await axios.post('http://10.5.9.45:5000/remove_machine_under_maintenance', { serialNumber });
+      await axios.post('http://10.5.8.145:5005/remove_machine_under_maintenance', { serialNumber });
       setAlert({ show: true, message: 'Máquina removida da manutenção com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
     } catch (error) {
@@ -79,7 +79,7 @@ const MaquinasEmManutencao = () => {
 
   const handleMarkMachineAsReady = async (serialNumber) => {
     try {
-      await axios.post('http://10.5.9.45:5000/update_machine_status', { serialNumber, status: 'Pronto' });
+      await axios.post('http://10.5.8.145:5005/update_machine_status', { serialNumber, status: 'Pronto' });
       setAlert({ show: true, message: 'Máquina marcada como pronta com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
     } catch (error) {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://10.5.9.45:5000', //flask
+  baseURL: 'http://10.5.8.145:5005', //flask
 });
 
 export const fetchMachines = () => api.get('/machines');

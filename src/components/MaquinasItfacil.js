@@ -23,7 +23,7 @@ const MaquinasItfacil = () => {
 
   const fetchBackupMachines = async () => {
     try {
-      const response = await axios.get('http://10.5.9.45:5000/itfacil_machines');
+      const response = await axios.get('http://10.5.8.145:5005/itfacil_machines');
       setBackupMachines(response.data);
     } catch (error) {
       setAlert({ show: true, message: 'Erro ao carregar máquinas da itfacil.', variant: 'danger' });
@@ -48,7 +48,7 @@ const MaquinasItfacil = () => {
 
   const handleSaveMachine = async () => {
     try {
-      await axios.post('http://10.5.9.45:5000/add_itfacil_machine', currentMachine);
+      await axios.post('http://10.5.8.145:5005/add_itfacil_machine', currentMachine);
       setAlert({ show: true, message: 'Máquina da ITFácil adicionada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
@@ -59,7 +59,7 @@ const MaquinasItfacil = () => {
 
   const handleUpdateMachine = async () => {
     try {
-      await axios.post('http://10.5.9.45:5000/edit_itfacil_machine', currentMachine);
+      await axios.post('http://10.5.8.145:5005/edit_itfacil_machine', currentMachine);
       setAlert({ show: true, message: 'Máquina da ITFácil atualizada com sucesso.', variant: 'success' });
       fetchBackupMachines();
       handleCloseModal();
@@ -70,7 +70,7 @@ const MaquinasItfacil = () => {
 
   const handleRemoveMachine = async (serialNumber) => {
     try {
-      await axios.post('http://10.5.9.45:5000/remove_itfacil_machine', { serialNumber });
+      await axios.post('http://10.5.8.145:5005/remove_itfacil_machine', { serialNumber });
       setAlert({ show: true, message: 'Máquina da ITFácil removida com sucesso.', variant: 'success' });
       fetchBackupMachines();
     } catch (error) {
