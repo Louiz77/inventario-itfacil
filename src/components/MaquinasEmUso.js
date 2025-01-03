@@ -10,6 +10,9 @@ import {
   Dropdown,
   Accordion,
   Card,
+  Button,
+  Spinner,
+  Modal
 } from "react-bootstrap";
 
 const MachinesTable = ({ title, machines, onRowClick, expandedId }) => (
@@ -83,11 +86,33 @@ const MachinesTable = ({ title, machines, onRowClick, expandedId }) => (
 );
 
 function MaquinasEmUso({ machines }) {
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState('updating');
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredMachines, setFilteredMachines] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
 
   const [expandedId, setExpandedId] = useState(null);
+
+  const handleUpdateAPI = async () => {
+    setShowUpdateModal(true);
+    setUpdateStatus('updating');
+    
+    try {
+      const response = await fetch('http://10.5.8.145:5005/update-machines');
+      if (response.status === 200) {
+        setUpdateStatus('success');
+      } else {
+        throw new Error('Update failed');
+      }
+    } catch (error) {
+      setUpdateStatus('error');
+    }
+  };
+
+  const handleSuccess = () => {
+    window.location.reload();
+  };
 
   const normalizeText = (text) =>
     text
@@ -139,7 +164,11 @@ function MaquinasEmUso({ machines }) {
             </h5>
           </Col>
         </Row>
-
+        <div className="container mt-2 d-grid gap-2">
+          <Button variant="success" size="lg" className="mb-4" onClick={handleUpdateAPI}>
+            Atualizar lista de máquinas
+          </Button>
+        </div>
         <Row className="mb-3">
           <Col xs={12} md={12} className="mb-2">
             <InputGroup>
@@ -189,6 +218,53 @@ function MaquinasEmUso({ machines }) {
           </Col>
         </Row>
       </Container>
+      <Modal
+        show={showUpdateModal}
+        backdrop="static"
+        keyboard={false}
+        centered
+      >
+        <Modal.Body className="text-center p-4">
+          {updateStatus === 'updating' && (
+            <>
+              <Spinner animation="border" className="mb-3" />
+              <h4>Atualizando lista de máquinas</h4>
+              <p>Por favor, não feche esta janela até a atualização ser concluída.</p>
+              <p>Tempo minimo: 3min</p>
+              <p className="mt-2">- Fazendo request para API do Defender;</p>
+              <p className="mt-2">- Organizando lista para inserção no banco de dados;</p>
+              <p className="mt-2">- Inserindo informações no banco de dados (Limite de inserções por minuto, sendo necessário aguardar alguns segundos).</p>
+            </>
+          )}
+          
+          {updateStatus === 'success' && (
+            <>
+              <h4>Atualização concluída!</h4>
+              <Button 
+                variant="primary"
+                onClick={handleSuccess}
+                className="mt-3"
+              >
+                Entendido!
+              </Button>
+            </>
+          )}
+          
+          {updateStatus === 'error' && (
+            <>
+              <h4>Erro na atualização</h4>
+              <p>Ocorreu um erro ao atualizar a lista. Por favor, tente novamente.</p>
+              <Button 
+                variant="danger"
+                onClick={() => setShowUpdateModal(false)}
+                className="mt-3"
+              >
+                Fechar
+              </Button>
+            </>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
