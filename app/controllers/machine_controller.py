@@ -163,18 +163,14 @@ class MachineController:
         return jsonify({"message": "maintence row removed"}), 200
 
     def move_machine_to_backup(self):
-        """
-        Move uma máquina da aba de origem para a aba de backup.
-        """
         try:
             data = request.json
-            print(data)
             machine_id = data.get('serial')
-            source_sheet = data.get('sourceSheet', 'Máquinas Em Manutenção')
-            backup_sheet = data.get('backupSheet', 'Máquinas Backup')
+            destination = data.get('destination_sheet').lower().split(' ')[1]
+            machine_data = data.get('machine')
 
-            self.google_sheets_service.move_machine_to_backup(machine_id, source_sheet, backup_sheet)
-            return jsonify({"message": f"Máquina {machine_id} movida para {backup_sheet}."}), 200
+            result = self.google_sheets_service.move_machine(machine_id, destination, machine_data)
+            return jsonify({"message": result}), 200
         except Exception as e:
             print(f"Erro ao mover máquina: {e}")
             return jsonify({"error": str(e)}), 500

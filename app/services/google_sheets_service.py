@@ -215,32 +215,40 @@ class GoogleSheetsService:
         except Exception as e:
             print(f"Erro ao editar máquina: {e}")
 
-
-    def move_machine_to_backup(self, machine_id, source_sheet='Máquinas Em Manutenção', backup_sheet='Máquinas Backup'):
-        """
-        Move uma máquina de uma aba de origem para a aba de backup.
-
-        :param machine_id: ID da máquina a ser movida.
-        :param source_sheet: Nome da aba de origem.
-        :param backup_sheet: Nome da aba de backup.
-        """
+    def move_machine(self, machine_id, destination, machine_data):
         try:
-            # Referencia as abas de origem e backup
-            source = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet(source_sheet)
-            backup = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet(backup_sheet)
-
-            # Recupera todos os registros da aba de origem
+            source = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Em Manutenção')
             all_records = source.get_all_records()
 
-            for index, record in enumerate(all_records, start=2):  # Começa da linha 2 (ignora o cabeçalho)
-                if record.get('serial') == machine_id:  # Verifica pelo ID da máquina
-                    # Move os dados para a aba de backup
-                    backup.append_row(list(record.values()))
+            machine_found = False
+            for index, record in enumerate(all_records, start=2):
+                if str(record.get('serial')) == str(machine_id):
+                    machine_found = True
+                    if destination.lower() == 'backup':
+                        backup_sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Backup')
+                        backup_sheet.append_row(
+                            [machine_data['hostname'], machine_data['serial'], machine_data['model'],
+                             machine_data['status'], machine_data['obs']])
+                        source.delete_rows(index)
+                        return "Máquina movida para Backup"
 
-                    # Remove a linha da aba de origem
-                    source.delete_rows(index)
-                    print(f"Máquina {machine_id} movida de {source_sheet} para {backup_sheet}.")
-                    return
-            print(f"Máquina {machine_id} não encontrada na aba {source_sheet}.")
+                    elif destination.lower() == 'itfacil':
+                        itfacil_sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas ITFacil')
+                        itfacil_sheet.append_row(
+                            [machine_data['hostname'], machine_data['serial'], machine_data['model'],
+                             'Pendência N/A', machine_data['status'], machine_data['obs'],
+                             machine_data['empresa']])
+                        source.delete_rows(index)
+                        return "Máquina movida para ITFacil"
+
+                    elif destination.lower() == 'ecom':
+                        source.delete_rows(index)
+                        return "Máquina removida da manutenção"
+
+            if not machine_found:
+                raise Exception("Máquina não encontrada")
+
+            return "Operação concluída"
+
         except Exception as e:
-            print(f"Erro ao mover máquina: {e}")
+            raise Exception(f"Erro ao mover máquina: {str(e)}")
