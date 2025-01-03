@@ -17,6 +17,12 @@ class GoogleSheetsService:
     def add_machines(self, machines, max_retries=20, delay=15):
         """Adiciona os dispositivos enriquecidos à planilha Google Sheets, com re-tentativas."""
         try:
+            header_range = self.sheet.range('A1:K1')
+            all_range = self.sheet.range('A2:K' + str(self.sheet.row_count))
+            for cell in all_range:
+                cell.value = ''
+            self.sheet.update_cells(all_range)
+            print("Apagando linhas para atualização")
             values = []
             for machine in machines:
                 if isinstance(machine, dict):
@@ -25,13 +31,13 @@ class GoogleSheetsService:
                         machine.get("lastLoggedInUser", ""),
                         machine.get("operatingSystem", ""),
                         machine.get("siteName", ""),
-                        machine.get("deviceType",),
+                        machine.get("deviceType", ),
                         machine.get("model"),
                         machine.get("manufacturer"),
                         machine.get("serialNumber", ""),
                         machine.get("udf3", ""),
                         machine.get("domain", ""),
-                        machine.get("udf9",  ""),
+                        machine.get("udf9", ""),
                     ])
 
             # Adiciona as linhas à planilha com re-tentativas
@@ -40,14 +46,14 @@ class GoogleSheetsService:
                 while retries < max_retries:
                     try:
                         self.sheet.append_row(value)
-                        break  # Sai do loop se a operação for bem-sucedida
+                        break
                     except Exception as e:
                         if "Quota exceeded" in str(e):
                             retries += 1
                             print(f"Quota excedida, aguardando {delay} segundos... (Tentativa {retries}/{max_retries})")
                             time.sleep(delay)
                         else:
-                            raise  # Re-levanta exceções que não estão relacionadas à cota
+                            raise
                 else:
                     print(f"Falha ao adicionar a linha após {max_retries} tentativas: {value}")
 
