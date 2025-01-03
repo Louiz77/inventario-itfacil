@@ -2,11 +2,13 @@ from flask import jsonify, request
 from app.models.machine import Machine
 from app.services.google_sheets_service import GoogleSheetsService
 from app.services.machine_services import MachineService
+from app.services.machine_services import AuthService
 
 class MachineController:
     def __init__(self):
         self.google_sheets_service = GoogleSheetsService()
-        self.machine_service = MachineService(self.google_sheets_service)
+        self.auth_service = AuthService()
+        self.machine_service = MachineService(self.google_sheets_service, self.auth_service)
 
     def update_machines(self):
         self.machine_service.fetch_external_machines()
@@ -114,3 +116,65 @@ class MachineController:
         print(data)
         self.google_sheets_service.remove_itfacil_machine(data['serialNumber'])
         return jsonify({"message": "itfacil row removed"}), 200
+
+    def get_maintence_machines(self):
+        """Recupera as máquinas da aba 'Máquinas Manutenção'."""
+        maintence_machines = self.google_sheets_service.get_maintence_machines()
+        return jsonify(maintence_machines), 200
+
+    def edit_maintence_machine(self):
+        try:
+            data = request.json
+            print(f"Payload recebido: {data}")
+
+            machine = Machine(
+                id=data.get('serial'),
+                name=data.get('hostname'),
+                status=data.get('status'),
+                model=data.get('model'),
+                equipamento=data.get('defeito'), # SOMENTE NESTE CENARIO ESTE EQUIPAMENTO É TRATADO COMO O ESPAÇO DE "DEFEITO"
+                obs=data.get('obs'),
+                empresa=data.get('empresa')
+            )
+
+            self.google_sheets_service.edit_maintence_machine(machine.to_dict())
+            return jsonify({"message": "Máquina atualizada"}), 200
+        except Exception as e:
+            print(f"Erro ao editar máquina: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    def add_maintence_machine(self):
+        """Adiciona uma nova máquina à aba 'Máquinas Manutenção'."""
+        try:
+            data = request.json
+            print("data: ", data)  # SOMENTE NESTE CENARIO ESTE EQUIPAMENTO É TRATADO COMO O ESPAÇO DE "DEFEITO"
+            machine = Machine(id=data['serialNumber'], name=data['hostname'], model=data['model'], equipamento=data.get('defect'), status=data['status'], obs=data['observation'], empresa=data['empresa'])
+            self.google_sheets_service.add_maintence_machine(machine.to_dict())
+            return jsonify({"message": "maintence row added"}), 201
+        except Exception as e:
+            print(f"Erro ao adicionar máquina: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    def remove_maintence_machine(self):
+        """Remove uma máquina da aba 'Máquinas Manutenção'."""
+        data = request.json
+        print(data)  # SOMENTE NESTE CENARIO ESTE EQUIPAMENTO É TRATADO COMO O ESPAÇO DE "DEFEITO"
+        self.google_sheets_service.remove_maintence_machine(data['serial'])
+        return jsonify({"message": "maintence row removed"}), 200
+
+    def move_machine_to_backup(self):
+        """
+        Move uma máquina da aba de origem para a aba de backup.
+        """
+        try:
+            data = request.json
+            print(data)
+            machine_id = data.get('serial')
+            source_sheet = data.get('sourceSheet', 'Máquinas Em Manutenção')
+            backup_sheet = data.get('backupSheet', 'Máquinas Backup')
+
+            self.google_sheets_service.move_machine_to_backup(machine_id, source_sheet, backup_sheet)
+            return jsonify({"message": f"Máquina {machine_id} movida para {backup_sheet}."}), 200
+        except Exception as e:
+            print(f"Erro ao mover máquina: {e}")
+            return jsonify({"error": str(e)}), 500
