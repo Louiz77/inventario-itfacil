@@ -14,7 +14,7 @@ class GoogleSheetsService:
         """Recupera todos os registros da planilha."""
         return self.sheet.get_all_records()
 
-    def add_machines(self, machines, max_retries=10, delay=10):
+    def add_machines(self, machines, max_retries=20, delay=15):
         """Adiciona os dispositivos enriquecidos à planilha Google Sheets, com re-tentativas."""
         try:
             values = []
@@ -163,3 +163,84 @@ class GoogleSheetsService:
         except Exception as e:
             print(f"Erro ao editar máquina: {e}")
 
+    def get_maintence_machines(self):
+        """Recupera todas as máquinas da aba 'Máquinas Manutenção'."""
+        sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Em Manutenção')
+        return sheet.get_all_records()
+
+    def add_maintence_machine(self, machine):
+        """Adiciona uma nova máquina à aba 'Máquinas Manutenção'."""
+        try:
+            sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Em Manutenção')
+            print(machine)
+            sheet.append_row([machine['name'],
+                              machine['id'],
+                              machine['model'],
+                              machine['equipamento'],  # SOMENTE NESTE CENARIO ESTE EQUIPAMENTO É TRATADO COMO O ESPAÇO DE "DEFEITO"
+                              machine['status'],
+                              machine['obs'],
+                              machine['empresa']])
+        except Exception as e:
+            print(f"erro: {e}")
+
+    def remove_maintence_machine(self, machine_id):
+        """Remove uma máquina pelo ID na aba 'Máquinas Manutenção'."""
+        sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Em Manutenção')
+        all_records = sheet.get_all_records()
+        for index, record in enumerate(all_records, start=2):
+            if record.get('serial') == machine_id:  # Verifica pelo 'id'
+                sheet.delete_rows(index)
+                break
+
+    def edit_maintence_machine(self, machine):
+        """Edita os dados de uma máquina existente na aba 'Máquinas Manutenção', exceto o serialNumber."""
+        try:
+            sheet = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet('Máquinas Em Manutenção')
+            all_records = sheet.get_all_records()
+            for index, record in enumerate(all_records, start=2):
+                if record.get('serial') == machine['id']:
+                    print(f'Maquina class: {machine}')
+                    sheet.update(f"A{index}:G{index}", [[
+                        machine['name'],
+                        record.get('serial'),
+                        machine['model'],
+                        machine['equipamento'],  # SOMENTE NESTE CENARIO ESTE EQUIPAMENTO É TRATADO COMO O ESPAÇO DE "DEFEITO"
+                        machine['status'],
+                        machine['obs'],
+                        machine['empresa']
+                    ]])
+                    print(f"Máquina com serialNumber {machine['id']} atualizada com sucesso.")
+                    return
+            print("Máquina com serialNumber não encontrada para edição.")
+        except Exception as e:
+            print(f"Erro ao editar máquina: {e}")
+
+
+    def move_machine_to_backup(self, machine_id, source_sheet='Máquinas Em Manutenção', backup_sheet='Máquinas Backup'):
+        """
+        Move uma máquina de uma aba de origem para a aba de backup.
+
+        :param machine_id: ID da máquina a ser movida.
+        :param source_sheet: Nome da aba de origem.
+        :param backup_sheet: Nome da aba de backup.
+        """
+        try:
+            # Referencia as abas de origem e backup
+            source = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet(source_sheet)
+            backup = self.client.open_by_key(Config.GOOGLE_SHEET_ID).worksheet(backup_sheet)
+
+            # Recupera todos os registros da aba de origem
+            all_records = source.get_all_records()
+
+            for index, record in enumerate(all_records, start=2):  # Começa da linha 2 (ignora o cabeçalho)
+                if record.get('serial') == machine_id:  # Verifica pelo ID da máquina
+                    # Move os dados para a aba de backup
+                    backup.append_row(list(record.values()))
+
+                    # Remove a linha da aba de origem
+                    source.delete_rows(index)
+                    print(f"Máquina {machine_id} movida de {source_sheet} para {backup_sheet}.")
+                    return
+            print(f"Máquina {machine_id} não encontrada na aba {source_sheet}.")
+        except Exception as e:
+            print(f"Erro ao mover máquina: {e}")
