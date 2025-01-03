@@ -6,14 +6,16 @@ const MaquinasEmManutencao = () => {
   const [machinesUnderMaintenance, setMachinesUnderMaintenance] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showMoveModal, setShowMoveModal] = useState(false);
   const [currentMachine, setCurrentMachine] = useState({
     serialNumber: '',
     hostname: '',
     model: '',
-    defect: '',  // Novo campo para o defeito
+    defect: '',
     status: '',
     observation: ''
   });
+  const [moveDestination, setMoveDestination] = useState('');
   const [alert, setAlert] = useState({ show: false, message: '', variant: '' });
 
   useEffect(() => {
@@ -22,7 +24,7 @@ const MaquinasEmManutencao = () => {
 
   const fetchMachinesUnderMaintenance = async () => {
     try {
-      const response = await axios.get('http://10.5.8.145:5005/machines_under_maintenance');
+      const response = await axios.get('http://10.5.8.145:5005/maintence_machines');
       setMachinesUnderMaintenance(response.data);
     } catch (error) {
       setAlert({ show: true, message: 'Erro ao carregar máquinas em manutenção.', variant: 'danger' });
@@ -30,7 +32,7 @@ const MaquinasEmManutencao = () => {
   };
 
   const handleShowAddModal = () => {
-    setCurrentMachine({ serialNumber: '', hostname: '', model: '', defect: '', status: '', observation: '' });
+    setCurrentMachine({ serial: '', hostname: '', model: '', defect: '', status: '', obs: '' });
     setShowAddModal(true);
   };
 
@@ -42,12 +44,12 @@ const MaquinasEmManutencao = () => {
   const handleCloseModal = () => {
     setShowAddModal(false);
     setShowEditModal(false);
-    setCurrentMachine({ serialNumber: '', hostname: '', model: '', defect: '', status: '', observation: '' });
+    setCurrentMachine({ serial: '', hostname: '', model: '', defect: '', status: '', obs: '' });
   };
 
   const handleSaveMachine = async () => {
     try {
-      await axios.post('http://10.5.8.145:5005/add_machine_under_maintenance', currentMachine);
+      await axios.post('http://10.5.8.145:5005/add_maintence_machines', currentMachine);
       setAlert({ show: true, message: 'Máquina adicionada à manutenção com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
       handleCloseModal();
@@ -58,7 +60,7 @@ const MaquinasEmManutencao = () => {
 
   const handleUpdateMachine = async () => {
     try {
-      await axios.post('http://10.5.8.145:5005/edit_machine_under_maintenance', currentMachine);
+      await axios.post('http://10.5.8.145:5005/edit_maintence_machines', currentMachine);
       setAlert({ show: true, message: 'Máquina atualizada com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
       handleCloseModal();
@@ -67,9 +69,9 @@ const MaquinasEmManutencao = () => {
     }
   };
 
-  const handleRemoveMachine = async (serialNumber) => {
+  const handleRemoveMachine = async (serial) => {
     try {
-      await axios.post('http://10.5.8.145:5005/remove_machine_under_maintenance', { serialNumber });
+      await axios.post('http://10.5.8.145:5005/remove_maintence_machines', { serial });
       setAlert({ show: true, message: 'Máquina removida da manutenção com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
     } catch (error) {
@@ -77,13 +79,45 @@ const MaquinasEmManutencao = () => {
     }
   };
 
-  const handleMarkMachineAsReady = async (serialNumber) => {
+  const handleShowMoveModal = (machine) => {
+    setCurrentMachine(machine);
+    setShowMoveModal(true);
+  };
+
+  const handleMoveMachine = async () => {
     try {
-      await axios.post('http://10.5.8.145:5005/update_machine_status', { serialNumber, status: 'Pronto' });
-      setAlert({ show: true, message: 'Máquina marcada como pronta com sucesso.', variant: 'success' });
+      const currentDate = new Date().toLocaleDateString('pt-BR');
+      const updatedMachine = {
+        ...currentMachine,
+        obs: `Máquina retornou do conserto | Data de modificação: ${currentDate}`,
+        status: 'Usada em bom estado'
+      };
+
+      let destinationSheet = '';
+      // eslint-disable-next-line
+      switch (moveDestination) {
+        case 'backup':
+          destinationSheet = 'Máquinas Backup';
+          break;
+        case 'itfacil':
+          destinationSheet = 'Máquinas ITFacil';
+          break;
+        case 'ecom':
+          destinationSheet = 'Máquinas ECOM';
+          break;
+      }
+
+      await axios.post('http://10.5.8.145:5005/move_machine_to_backup', {
+        serial: currentMachine.serial,
+        destination_sheet: destinationSheet,
+        machine: updatedMachine
+      });
+
+      setAlert({ show: true, message: 'Máquina movida com sucesso.', variant: 'success' });
       fetchMachinesUnderMaintenance();
+      setShowMoveModal(false);
     } catch (error) {
-      setAlert({ show: true, message: 'Erro ao marcar a máquina como pronta.', variant: 'danger' });
+      setAlert({ show: true, message: 'Erro ao mover a máquina.', variant: 'danger' });
     }
   };
 
@@ -94,45 +128,49 @@ const MaquinasEmManutencao = () => {
       <Button variant="primary" size="lg" className="mb-5" onClick={handleShowAddModal}>
         Adicionar Máquina
       </Button>
-      <div className='table-responsive'>
+      <div className='table-responsive text-center'>
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>Hostname</th>
               <th>Serial Number</th>
+              <th>Hostname</th>
               <th>Modelo</th>
+              <th>Defeito</th>
               <th>Status</th>
+              <th>Empresa</th>
               <th>Observação</th>
               <th>Ações</th>
             </tr>
           </thead>
           <tbody>
             {machinesUnderMaintenance.map((machine) => (
-              <tr key={machine.serialNumber}>
+              <tr key={machine.serial}>
+                <td>{machine.serial}</td>
                 <td>{machine.hostname}</td>
-                <td>{machine.serialNumber}</td>
                 <td>{machine.model}</td>
+                <td>{machine.defeito}</td>
                 <td>{machine.status}</td>
-                <td>{machine.observation}</td>
+                <td>{machine.empresa}</td>
+                <td>{machine.obs}</td>
                 <td>
                   <Button
                     variant="warning"
-                    className="me-4"
+                    className="m-1"
                     onClick={() => handleShowEditModal(machine)}
                   >
                     Editar
                   </Button>
                   <Button
                     variant="danger"
-                    onClick={() => handleRemoveMachine(machine.serialNumber)}
+                    onClick={() => handleRemoveMachine(machine.serial)}
                   >
                     Remover
                   </Button>
                   {machine.status !== 'Pronto' && (
                     <Button
                       variant="success"
-                      className="ms-4"
-                      onClick={() => handleMarkMachineAsReady(machine.serialNumber)}
+                      className="m-1"
+                      onClick={() => handleShowMoveModal(machine)}
                     >
                       Pronto
                     </Button>
@@ -178,7 +216,6 @@ const MaquinasEmManutencao = () => {
                 onChange={(e) => setCurrentMachine({ ...currentMachine, model: e.target.value })}
               />
             </Form.Group>
-            {/* Novo campo de Defeito */}
             <Form.Group className="mb-3">
               <Form.Label>Defeito</Form.Label>
               <Form.Control
@@ -203,6 +240,16 @@ const MaquinasEmManutencao = () => {
                   />
                 ))}
               </div>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Empresa</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Descreva a empresa que a maquina atua"
+                value={currentMachine.empresa}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, empresa: e.target.value })}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Observação</Form.Label>
@@ -237,7 +284,7 @@ const MaquinasEmManutencao = () => {
               <Form.Label>Serial Number</Form.Label>
               <Form.Control
                 type="text"
-                value={currentMachine.serialNumber}
+                value={currentMachine.serial}
                 disabled
               />
             </Form.Group>
@@ -257,14 +304,21 @@ const MaquinasEmManutencao = () => {
                 onChange={(e) => setCurrentMachine({ ...currentMachine, model: e.target.value })}
               />
             </Form.Group>
-            {/* Novo campo de Defeito */}
+            <Form.Group className="mb-3">
+              <Form.Label>Empresa</Form.Label>
+              <Form.Control
+                type="text"
+                value={currentMachine.empresa}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, empresa: e.target.value })}
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Defeito</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                value={currentMachine.defect}
-                onChange={(e) => setCurrentMachine({ ...currentMachine, defect: e.target.value })}
+                value={currentMachine.defeito}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, defeito: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -287,8 +341,8 @@ const MaquinasEmManutencao = () => {
               <Form.Control
                 as="textarea"
                 rows={3}
-                value={currentMachine.observation}
-                onChange={(e) => setCurrentMachine({ ...currentMachine, observation: e.target.value })}
+                value={currentMachine.obs}
+                onChange={(e) => setCurrentMachine({ ...currentMachine, obs: e.target.value })}
               />
             </Form.Group>
           </Form>
@@ -299,6 +353,54 @@ const MaquinasEmManutencao = () => {
           </Button>
           <Button variant="primary" onClick={handleUpdateMachine}>
             Salvar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showMoveModal} onHide={() => setShowMoveModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Mover Máquina</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Selecione o destino da máquina</Form.Label>
+              <div>
+                <Form.Check
+                  type="radio"
+                  name="moveDestination"
+                  label="Máquinas Backup"
+                  checked={moveDestination === 'backup'}
+                  onChange={() => setMoveDestination('backup')}
+                />
+                <Form.Check
+                  type="radio"
+                  name="moveDestination"
+                  label="Máquinas ITFacil"
+                  checked={moveDestination === 'itfacil'}
+                  onChange={() => setMoveDestination('itfacil')}
+                />
+                <Form.Check
+                  type="radio"
+                  name="moveDestination"
+                  label="Máquinas ECOM"
+                  checked={moveDestination === 'ecom'}
+                  onChange={() => setMoveDestination('ecom')}
+                />
+              </div>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMoveModal(false)}>
+            Cancelar
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleMoveMachine}
+            disabled={!moveDestination}
+          >
+            Mover
           </Button>
         </Modal.Footer>
       </Modal>

@@ -83,7 +83,7 @@ const MaquinasBackup = () => {
       <Button variant="primary" size="lg" className="mb-5" onClick={handleShowAddModal}>
         Adicionar Máquina
       </Button>
-      <div className='table-responsive'>
+      <div className='table-responsive text-center'>
         <Table striped bordered hover>
           <thead>
             <tr>

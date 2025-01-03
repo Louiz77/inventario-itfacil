@@ -11,7 +11,6 @@ import {
   Accordion,
   Card,
 } from "react-bootstrap";
-import "./MaquinasEmUso.css";
 
 const MachinesTable = ({ title, machines, onRowClick, expandedId }) => (
   <>
