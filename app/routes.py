@@ -89,3 +89,38 @@ def edit_itfacil_machine():
         return controller.edit_itfacil_machine()
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@routes.route('/maintence_machines', methods=['GET'])
+def get_maintence_machines():
+    try:
+        print("Requisição | ListarMáquinasManutencao")
+        return controller.get_maintence_machines()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@routes.route('/add_maintence_machines', methods=['POST'])
+def add_maintencemachine():
+    try:
+        print("Requisição | AdicionarMáquinaManutencao")
+        return controller.add_maintence_machine()
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
+@routes.route('/remove_maintence_machines', methods=['POST'])
+def remove_maintencemachine():
+    print("Requisição | RemoverMáquinaManutencao")
+    return controller.remove_maintence_machine()
+
+@routes.route('/edit_maintence_machines', methods=['POST'])
+def edit_maintence_machine():
+    try:
+        print("Requisição | EditarMáquinaManutencao")
+        return controller.edit_maintence_machine()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@routes.route('/move_machine_to_backup', methods=['POST'])
+def move_machine_to_backup():
+    print("Requisição | AtualizarStatusManutencao")
+    return controller.move_machine_to_backup()
